@@ -71,7 +71,7 @@ client.on('message', (message) => {
         message.guild === null
       ) {
         handler(message)
-        log(
+        console.log(
           `Served command ${message.content} successfully for ${message.author.username}.`,
         )
       } else {
