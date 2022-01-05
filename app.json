@@ -1,0 +1,10 @@
+{
+  "name": "bot-skeleton",
+  "description": "A skeleton for discord bots that interact with contracts to get and display data",
+  "repository": "",
+  "logo": "",
+  "keywords": ["node", "discord"],
+  "env": {
+    "DISCORD_API_TOKEN": "YOUR_DISCORD_API_TOKEN",
+  }
+}
