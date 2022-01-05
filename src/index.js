@@ -1,12 +1,19 @@
-const { Client } = require('discord.js')
+const Discord = require('discord.js')
 const dotenv = require('dotenv')
 const { getStaked, getVested, getClaimed } = require('./fetchData')
+const { RequestHandlerError } = require('./error-utils')
+const detectHandler = require('./parser/detectHandler')
 
 const { numberWithCommas } = require('./utils')
 
 dotenv.config()
 
-const client = new Client()
+const client = new Discord.Client({
+  intents: [
+    "GUILDS",
+    "GUILD_MESSAGES",
+    "DIRECT_MESSAGES"
+  ]})
 
 let next = 0
 
@@ -52,5 +59,34 @@ client.setInterval(async () => {
   }
 
 }, parseInt(process.env.INTERVAL) * 60 * 1000)
+
+client.on('message', (message) => {
+  if (message.author.bot) return
+  try {
+    const handler = detectHandler(message.content)
+    if (handler) {
+      // Checks if channel is #bot-commands or message is NOT from guild
+      if (
+        message.channel.id === process.env.CHANNEL_ID ||
+        message.guild === null
+      ) {
+        handler(message)
+        log(
+          `Served command ${message.content} successfully for ${message.author.username}.`,
+        )
+      } else {
+        message.delete({ timeout: 500 })
+        return
+      }
+    }
+  } catch (err) {
+    if (err instanceof RequestHandlerError) {
+      log(err)
+      message.reply(
+        'Could not find the requested command. Please use !trident help for more info.',
+      )
+    }
+  }
+})
 
 client.login(process.env.DISCORD_API_TOKEN)

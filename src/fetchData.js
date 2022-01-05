@@ -40,21 +40,46 @@ const minABI = [
 
 const bmag = new web3.eth.Contract(minABI, process.env.TOKEN_ID)
 
+async function calcVested(supply) {
+  currentTime = Date.now()
+  current_steps = currentTime - parseInt(process.env.START_TIME)
+  step_value = supply/AMOUNT_STEPS
+  vested = supply - (step_value * current_steps)
+  return vested
+}
+
+exports.getData = async () => {
+  let data = {
+    outstanding: 0,
+    issued: 0,
+    claimed: 0,
+    vested: 0
+  }
+
+  outstanding = await bmag.methods.outstandingSupply().call()
+  data.outstanding = outstanding / 10 ** DECIMALS
+
+  issued = await bmag.methods.issuedSupply().call()
+  data.issued = issued / 10 ** DECIMALS
+
+  data.claimed = (issued - outstanding) / 10 ** DECIMALS
+
+  vested = await calcVested(issued)
+  data.vested = vested / 10 ** DECIMALS
+  return data
+}
+
 exports.getStaked = async () => {
-  stakedAmount = await bmag.methods.outstandingSupply().call()
-  stakedAmount /= 10 ** DECIMALS
-  return stakedAmount.toFixed(2)
+  staked = await bmag.methods.outstandingSupply().call()
+  staked /= 10 ** DECIMALS
+  return staked.toFixed(2)
 }
 
 exports.getVested = async () => {
   supply = await bmag.methods.issuedSupply().call()
   supply /= 10 ** DECIMALS
 
-  currentTime = Date.now()
-  current_steps = currentTime - parseInt(process.env.START_TIME)
-  step_value = supply/AMOUNT_STEPS
-
-  vested = supply - (step_value * current_steps)
+  vested = await calcVested(supply)
   return vested.toFixed(2)
 }
 
