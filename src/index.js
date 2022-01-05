@@ -10,12 +10,11 @@ const client = new Client()
 
 let next = 0
 
-// eslint-disable-next-line
 client.on('ready', () => {
   console.log(`Bot successfully started as ${client.user.tag}`)
 })
 
-async function() updateBot(nickname, status) {
+async function updateBot(nickname, status) {
   client.guilds.cache.forEach(async (guild) => {
     const botMember = guild.me
     await botMember.setNickname(numberWithCommas(nickname))
@@ -33,10 +32,10 @@ client.setInterval(async () => {
     // display staked bMag
     staked = await getStaked()
     status = ['Staked bMAG', { type: 'WATCHING' }]
-    await updateBot(staked, staked)
+    await updateBot(staked, status)
 
     next = 1
-  } if(next == 1) {
+  } else if(next == 1) {
     // display vested bMag
     vested = await getVested()
     status = ['Vested bMAG', { type: 'WATCHING' }]
@@ -48,7 +47,7 @@ client.setInterval(async () => {
     claimed = await getClaimed()
     status = ['Claimed bMAG', { type: 'WATCHING' }]
     await updateBot(claimed, status)
-    
+
     next = 0
   }
 

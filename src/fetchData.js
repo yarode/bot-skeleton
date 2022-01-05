@@ -38,28 +38,33 @@ const minABI = [
     "type":"function"
   }]
 
-const bmag = new web3.eth.contract(minABI, process.env.TOKEN_ID)
+const bmag = new web3.eth.Contract(minABI, process.env.TOKEN_ID)
 
-exports.getStaked() = async () => {
-  stakedAmount = await bmag.methods.outStandingSupply().call()
+exports.getStaked = async () => {
+  stakedAmount = await bmag.methods.outstandingSupply().call()
   stakedAmount /= 10 ** DECIMALS
   return stakedAmount.toFixed(2)
 }
 
-exports.getVested() = async () => {
-  currentTime = Date.now()
-  current_steps = currentTime - process.env.START_TIME
+exports.getVested = async () => {
   supply = await bmag.methods.issuedSupply().call()
   supply /= 10 ** DECIMALS
+
+  currentTime = Date.now()
+  current_steps = currentTime - parseInt(process.env.START_TIME)
   step_value = supply/AMOUNT_STEPS
+
   vested = supply - (step_value * current_steps)
   return vested.toFixed(2)
 }
 
-exports.getClaimed() = async () => {
+exports.getClaimed = async () => {
   supply = await bmag.methods.issuedSupply().call()
-  staked = await bmag.methods.outStandingSupply().call()
-  claimed = supply - staked
-  claimed /= 10 ** DECIMALS
+  supply /= 10 ** DECIMALS
+
+  outstanding = await bmag.methods.outstandingSupply().call()
+  outstanding /= 10 ** DECIMALS
+
+  claimed = supply - outstanding
   return claimed.toFixed(2)
 }
